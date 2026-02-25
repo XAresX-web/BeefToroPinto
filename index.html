@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 80vh;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: system-ui;
+        overflow: hidden;
+      }
+
+      /* CANVAS */
+      canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+
+      /* LUZ DINÁMICA */
+      .light {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 0, 0, 0.25),
+          transparent 70%
+        );
+        filter: blur(100px);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      /* CONTENEDOR */
+      .wrapper {
+        position: relative;
+        text-align: center;
+        z-index: 3;
+      }
+
+      /* TITULO */
+      h1 {
+        font-family: "Noto Sans", sans-serif;
+        font-size: clamp(110px, 20vw, 220px);
+        font-weight: 900;
+        line-height: 1;
+
+        background-image: url("images/Animate.jpg");
+        background-size: 220% 100%;
+        background-repeat: repeat-x;
+
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+
+        animation:
+          cinematicMove 25s linear infinite,
+          glowFinal 5s ease-in-out infinite;
+
+        filter: drop-shadow(0 0 60px rgba(255, 0, 0, 0.8));
+        transition: transform 0.3s ease;
+      }
+
+      /* Movimiento infinito */
+      @keyframes cinematicMove {
+        from {
+          background-position-x: 0%;
+        }
+        to {
+          background-position-x: 300%;
+        }
+      }
+
+      /* Glow respiración */
+      @keyframes glowFinal {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 25px rgba(255, 0, 0, 0.4));
+        }
+        50% {
+          filter: drop-shadow(0 0 90px rgba(255, 0, 0, 1));
+        }
+      }
+
+      /* SUBTITLE WRAPPER */
+      .subtitle {
+        position: relative;
+        display: inline-flex;
+        margin-top: 40px;
+      }
+
+      /* SUBTITLE INNER */
+      .subtitle-inner {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 18px;
+
+        padding: 16px 44px;
+        padding-right: calc(44px + clamp(5px, 1.5vw, 10px));
+        border-radius: 80px;
+
+        font-size: clamp(11px, 2.2vw, 14px);
+        letter-spacing: clamp(5px, 1.5vw, 10px);
+        color: rgba(255, 255, 255, 0.92);
+        text-transform: uppercase;
+        white-space: nowrap;
+
+        background: rgba(255, 0, 0, 0.04);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+
+        border: 1px solid rgba(255, 0, 0, 0.55);
+
+        box-shadow:
+          0 0 0 1px rgba(255, 0, 0, 0.08),
+          0 0 30px rgba(255, 0, 0, 0.3),
+          0 0 80px rgba(255, 0, 0, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06),
+          inset 0 0 30px rgba(255, 0, 0, 0.12);
+
+        animation: subtitleBreathe 4s ease-in-out infinite;
+      }
+
+      /* Líneas laterales */
+      .subtitle-inner::before,
+      .subtitle-inner::after {
+        content: "";
+        display: block;
+        width: clamp(14px, 3.5vw, 28px);
+        height: 1px;
+        flex-shrink: 0;
+      }
+
+      .subtitle-inner::before {
+        background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.8));
+      }
+      .subtitle-inner::after {
+        background: linear-gradient(90deg, rgba(255, 0, 0, 0.8), transparent);
+      }
+
+      /* Hover desktop */
+      @media (hover: hover) {
+        body:hover h1 {
+          transform: scale(1.04);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="bg"></canvas>
+    <div class="light" id="light"></div>
+
+    <div class="wrapper">
+      <h1>BEEF TORO PINTO</h1>
+      <div class="subtitle">
+        <div class="subtitle-inner">PRÓXIMAMENTE</div>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("bg");
+      const ctx = canvas.getContext("2d");
+
+      let particles = [];
+      let dpr = window.devicePixelRatio || 1;
+
+      function resize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        particles = [];
+        for (let i = 0; i < 150; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            speed: Math.random() * 0.4 + 0.1,
+            size: Math.random() * 2 + 1,
+          });
+        }
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach((p) => {
+          p.y -= p.speed;
+          if (p.y < 0) p.y = window.innerHeight;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255,0,0,.25)";
+          ctx.fill();
+        });
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+
+      const light = document.getElementById("light");
+
+      window.addEventListener(
+        "pointermove",
+        (e) => {
+          light.style.left = e.clientX + "px";
+          light.style.top = e.clientY + "px";
+        },
+        { passive: true },
+      );
+    </script>
+  </body>
+</html>
